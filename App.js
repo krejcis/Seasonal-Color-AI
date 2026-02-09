@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button, Image, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { StyleSheet, Text, View, Button, Image, TouchableOpacity, ScrollView, Platform, Modal, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
-import { analyzeColor, getSeasonPalette, getSeasonDescription } from './utils/colorLogic.js';
+import { analyzeColor, getSeasonPalette, getSeasonDescription, getPremiumContent } from './utils/colorLogic.js';
 
 // Since we cannot use expo-gl or canvas easily in standard Expo Go without adding libs that might be heavy,
 // We will mock the color extraction for now by just "simulating" it or picking a random realistic skin tone 
@@ -16,6 +16,17 @@ export default function App() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [premiumUnlocked, setPremiumUnlocked] = useState(false);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+
+  const handleUnlockPremium = () => {
+    // Simulate payment processing
+    setTimeout(() => {
+      setPremiumUnlocked(true);
+      setShowUnlockModal(false);
+      Alert.alert("Success", "Premium content unlocked!");
+    }, 1500);
+  };
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -85,6 +96,34 @@ export default function App() {
     }
   };
 
+  const renderPremiumContent = (season) => {
+    const content = getPremiumContent(season);
+    if (!content) return null;
+
+    return (
+      <View style={styles.premiumContent}>
+        <Text style={styles.premiumHeader}>Luxury Style Guide</Text>
+        <Text style={styles.premiumDescription}>{content.styleGuide}</Text>
+
+        <Text style={styles.subHeader}>Shopping List</Text>
+        {content.shoppingList.map((item, index) => (
+          <Text key={index} style={styles.listItem}>• {item}</Text>
+        ))}
+
+        <Text style={styles.subHeader}>Beauty & Hair</Text>
+        <Text style={styles.categoryTitle}>Makeup:</Text>
+        {content.beauty.makeup.map((item, index) => (
+          <Text key={index} style={styles.listItem}>• {item}</Text>
+        ))}
+
+        <Text style={styles.categoryTitle}>Hair:</Text>
+        {content.beauty.hair.map((item, index) => (
+          <Text key={index} style={styles.listItem}>• {item}</Text>
+        ))}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -138,18 +177,48 @@ export default function App() {
               ))}
             </View>
 
-            <View style={styles.premiumBox}>
-              <Text style={styles.premiumTitle}>Unlock Full Report</Text>
-              <Text style={styles.premiumText}>
-                Get 50+ outfit ideas, makeup shades, and hair colors for {result.season}.
-              </Text>
-              <TouchableOpacity style={styles.premiumButton}>
-                <Text style={styles.premiumButtonText}>Upgrade - $4.99</Text>
-              </TouchableOpacity>
-            </View>
+            {!premiumUnlocked ? (
+              <View style={styles.premiumBox}>
+                <Text style={styles.premiumTitle}>Unlock Full Report</Text>
+                <Text style={styles.premiumText}>
+                  Get 50+ outfit ideas, makeup shades, and hair colors for {result.season}.
+                </Text>
+                <TouchableOpacity style={styles.premiumButton} onPress={() => setShowUnlockModal(true)}>
+                  <Text style={styles.premiumButtonText}>Upgrade - $3.99</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              renderPremiumContent(result.season)
+            )}
           </View>
         )}
       </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showUnlockModal}
+        onRequestClose={() => setShowUnlockModal(false)}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Unlock Luxury Style Guide</Text>
+            <Text style={styles.modalDescription}>Get access to personalized shopping lists, beauty recommendations, and expert style tips for only $3.99.</Text>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.buttonClose]}
+              onPress={handleUnlockPremium}
+            >
+              <Text style={styles.textStyle}>Pay $3.99</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.buttonCancel]}
+              onPress={() => setShowUnlockModal(false)}
+            >
+              <Text style={styles.textStyle}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -317,5 +386,106 @@ const styles = StyleSheet.create({
   premiumButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  premiumContent: {
+    width: '100%',
+    backgroundColor: '#fffaf0',
+    borderRadius: 15,
+    padding: 20,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: '#d4af37',
+  },
+  premiumHeader: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#d4af37',
+    marginBottom: 10,
+    textAlign: 'center',
+    fontFamily: Platform.OS === 'ios' ? 'Didot' : 'serif',
+  },
+  premiumDescription: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 20,
+    fontStyle: 'italic',
+    textAlign: 'center',
+  },
+  subHeader: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 15,
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    paddingBottom: 5,
+  },
+  categoryTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#444',
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  listItem: {
+    fontSize: 16,
+    color: '#666',
+    marginLeft: 10,
+    marginBottom: 5,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: '80%',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  modalDescription: {
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#666',
+  },
+  modalButton: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+    width: '100%',
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  buttonClose: {
+    backgroundColor: '#d4af37',
+  },
+  buttonCancel: {
+    backgroundColor: '#999',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 16,
   },
 });
