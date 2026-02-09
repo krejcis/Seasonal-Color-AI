@@ -1,5 +1,5 @@
 
-const { analyzeColor, getSeasonPalette } = require('./colorLogic');
+const { analyzeColor, getSeasonPalette, getPremiumContent } = require('./colorLogic');
 
 describe('Color Logic', () => {
   test('Spring detection (Warm + Light)', () => {
@@ -20,5 +20,13 @@ describe('Color Logic', () => {
     const palette = getSeasonPalette('Spring');
     expect(palette.length).toBeGreaterThan(0);
     expect(palette).toContain('#FF7F50');
+  });
+
+  test('Premium Content generation', () => {
+    const content = getPremiumContent('Spring');
+    expect(content).toHaveProperty('shoppingList');
+    expect(content).toHaveProperty('beauty');
+    expect(content).toHaveProperty('styleGuide');
+    expect(content.shoppingList.length).toBeGreaterThan(0);
   });
 });

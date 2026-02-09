@@ -93,4 +93,67 @@ const getSeasonDescription = (season) => {
   }
 };
 
-module.exports = { analyzeColor, getSeasonPalette, getSeasonDescription };
+const getPremiumContent = (season) => {
+  const content = {
+    Spring: {
+      shoppingList: [
+        'Coral sundress',
+        'Gold jewelry',
+        'Light beige trench coat',
+        'Turquoise scarf',
+        'Cream silk blouse'
+      ],
+      beauty: {
+        makeup: ['Peach blush', 'Warm coral lipstick', 'Bronze eyeliner', 'Gold shimmer eyeshadow'],
+        hair: ['Golden blonde', 'Strawberry blonde', 'Light auburn', 'Honey brown']
+      },
+      styleGuide: "Embrace light, warm, and clear colors. Your style should be fresh and lively. Think about flowy fabrics, floral prints, and gold accessories to highlight your natural warmth."
+    },
+    Summer: {
+      shoppingList: [
+        'Powder blue blazer',
+        'Silver accessories',
+        'Soft lavender blouse',
+        'Pearl earrings',
+        'Grey tailored trousers'
+      ],
+      beauty: {
+        makeup: ['Rose pink blush', 'Mauve lipstick', 'Soft grey eyeliner', 'Cool berry gloss'],
+        hair: ['Ash blonde', 'Cool light brown', 'Platinum blonde', 'Soft grey']
+      },
+      styleGuide: "Opt for cool, muted, and soft tones. Your look is elegant and understated. Silver jewelry, pearls, and soft, dusty colors like rose, mauve, and slate blue complement your complexion beautifully."
+    },
+    Autumn: {
+      shoppingList: [
+        'Rust orange sweater',
+        'Gold hoop earrings',
+        'Olive green cargo pants',
+        'Mustard yellow scarf',
+        'Brown leather boots'
+      ],
+      beauty: {
+        makeup: ['Terracotta blush', 'Brick red lipstick', 'Warm brown eyeshadow', 'Copper highlighter'],
+        hair: ['Rich chestnut', 'Auburn', 'Warm chocolate brown', 'Coppery red']
+      },
+      styleGuide: "Rich, warm, and earthy tones are your best friends. Your style exudes warmth and depth. Layer textures like wool, leather, and suede in colors like burnt orange, olive, and chocolate brown."
+    },
+    Winter: {
+      shoppingList: [
+        'Navy wool coat',
+        'Silver statement necklace',
+        'Crisp white shirt',
+        'Black leather jacket',
+        'Royal blue dress'
+      ],
+      beauty: {
+        makeup: ['Cool red lipstick', 'Black liquid eyeliner', 'Silver eyeshadow', 'Berry cheek stain'],
+        hair: ['Jet black', 'Ash brown', 'Cool dark brown', 'Silver/Grey']
+      },
+      styleGuide: "You shine in high-contrast, cool, and vivid colors. Go for bold, sharp looks. Black, white, and jewel tones like emerald green and royal blue are stunning on you. Silver jewelry adds a sleek finish."
+    }
+  };
+
+  return content[season] || null;
+};
+
+module.exports = { analyzeColor, getSeasonPalette, getSeasonDescription, getPremiumContent };
