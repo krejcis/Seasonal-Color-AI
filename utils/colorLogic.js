@@ -1,62 +1,29 @@
 
 const analyzeColor = (r, g, b) => {
-  // 1. Normalize RGB
-  const rNorm = r / 255;
-  const gNorm = g / 255;
-  const bNorm = b / 255;
+  // 1. Přesnější výpočet jasu (Luminosity)
+  // Váha barev odpovídá citlivosti lidského oka
+  const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 
-  // 2. Convert to HSV/HSL for easier analysis
-  const max = Math.max(rNorm, gNorm, bNorm);
-  const min = Math.min(rNorm, gNorm, bNorm);
-  const d = max - min;
-  
-  let h = 0;
-  if (d === 0) h = 0;
-  else if (max === rNorm) h = (gNorm - bNorm) / d % 6;
-  else if (max === gNorm) h = (bNorm - rNorm) / d + 2;
-  else h = (rNorm - gNorm) / d + 4;
-  
-  h = Math.round(h * 60);
-  if (h < 0) h += 360;
+  // 2. Rozhodnutí o podtónu (Warm vs Cool)
+  // Upravená podmínka pro lepší detekci pleti
+  const isWarm = (r > b) && (g > (b * 0.9));
 
-  const l = (max + min) / 2;
-  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  // 3. Rozhodnutí o jasu (Light vs Dark)
+  // Práh 0.65 lépe odděluje Summer/Spring od Winter/Autumn
+  const isLight = brightness > 0.65;
 
-  // 3. Determine Undertone (Cool vs Warm)
-  // Simplified logic: 
-  // Warm: Yellow/Gold undertones. Hues 0-60 (Red-Yellow) or 330-360.
-  // Cool: Blue/Pink undertones. Hues 180-300 (Cyan-Magenta).
-  // Green/Purple are borderline.
-  
-  // Actually, skin tone analysis is more about "Golden" vs "Rosy".
-  // If R > B significantly, it's often warm.
-  
-  const isWarm = (r > b) && (g > b); // Rudimentary check
-
-  // 4. Determine Contrast (High vs Low) / Value (Light vs Dark)
-  const isLight = l > 0.5;
-
-  // 5. Assign Season
-  // Spring: Warm + Light
-  // Autumn: Warm + Dark
-  // Summer: Cool + Light
-  // Winter: Cool + Dark
-
-  let season = "Winter"; // Default
+  // 4. Přiřazení sezóny
+  let season = "Winter";
   if (isWarm) {
-    if (isLight) season = "Spring";
-    else season = "Autumn";
+    season = isLight ? "Spring" : "Autumn";
   } else {
-    if (isLight) season = "Summer";
-    else season = "Winter";
+    season = isLight ? "Summer" : "Winter";
   }
 
   return {
     season,
     details: {
-      hue: h,
-      saturation: s.toFixed(2),
-      lightness: l.toFixed(2),
+      brightness: brightness.toFixed(2),
       isWarm,
       isLight
     }
@@ -64,7 +31,7 @@ const analyzeColor = (r, g, b) => {
 };
 
 const getSeasonPalette = (season) => {
-  switch(season) {
+  switch (season) {
     case 'Spring':
       return ['#FF7F50', '#FFD700', '#98FB98', '#E0FFFF', '#FFA07A']; // Coral, Gold, PaleGreen, LightCyan, LightSalmon
     case 'Autumn':
@@ -79,7 +46,7 @@ const getSeasonPalette = (season) => {
 };
 
 const getSeasonDescription = (season) => {
-  switch(season) {
+  switch (season) {
     case 'Spring':
       return "You shine in warm, fresh, and clear colors. Think tropical islands!";
     case 'Autumn':
